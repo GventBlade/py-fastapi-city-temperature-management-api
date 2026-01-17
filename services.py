@@ -1,6 +1,7 @@
 import httpx
 from datetime import datetime
 import schemas
+import asyncio
 
 async def fetch_city_weather(city_name: str) -> float | None:
     async with httpx.AsyncClient() as client:
@@ -28,8 +29,21 @@ async def fetch_city_weather(city_name: str) -> float | None:
 
 async def update_weather_for_all_cities(db, cities, create_temp_func):
     results = []
-    for city in cities:
+    # Створюємо словник для зберігання результатів
+    temp_results = {}
+
+    async def fetch_and_store(city):
         temp = await fetch_city_weather(city.name)
+        temp_results[city.id] = temp
+
+    # Використовуємо сучасний TaskGroup (Python 3.11+)
+    async with asyncio.TaskGroup() as tg:
+        for city in cities:
+            tg.create_task(fetch_and_store(city))
+
+    # Після завершення групи обробляємо зібрані дані
+    for city in cities:
+        temp = temp_results.get(city.id)
         if temp is not None:
             new_temp_data = schemas.TemperatureCreate(
                 city_id=city.id,
