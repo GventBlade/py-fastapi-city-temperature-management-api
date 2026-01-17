@@ -32,7 +32,7 @@ async def delete_city(city_id: int, db: AsyncSession = Depends(get_db)):
 async def get_temperatures(city_id: int | None = None ,skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     return await crud.get_temperatures(db=db, city_id=city_id, skip=skip, limit=limit)
 
-@app.post("/temperature/update", status_code=201)
+@app.post("/temperatures/update", status_code=201)
 async def update_temperatures(db: AsyncSession = Depends(get_db)):
     cities = await crud.get_cities(db=db)
     if not cities:

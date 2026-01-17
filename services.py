@@ -18,7 +18,13 @@ async def fetch_city_weather(city_name: str) -> float | None:
         weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
         weather_response = await client.get(weather_url)
         weather_data = weather_response.json()
-        return weather_data["current_weather"]["temperature"]
+
+        current_weather = weather_data.get("current_weather")
+        if not current_weather:
+            return None
+
+        return current_weather.get("temperature")
+
 
 async def update_weather_for_all_cities(db, cities, create_temp_func):
     results = []
